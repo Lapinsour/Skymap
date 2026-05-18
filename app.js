@@ -1,3 +1,11 @@
+const supabaseUrl = "TON_URL"
+const supabaseKey = "TON_ANON_KEY"
+
+const supabase = window.supabase.createClient(
+  supabaseUrl,
+  supabaseKey
+)
+
 async function loadCards(){
 
   const res = await fetch(
