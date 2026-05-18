@@ -219,7 +219,7 @@ elif page == "Bibliothèque":
 
         # 🔐 image Supabase Storage
         img_url = supabase.storage.from_("cards") \
-            .create_signed_url(card["image"], 60)["signedURL"]
+            .create_signed_url(card["image"], 60)["signedUrl"]
 
         with cols[i % 4]:
 
