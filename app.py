@@ -202,48 +202,48 @@ elif page == "Bibliothèque":
 
     st.title("📚 Bibliothèque")
 
-cards_data = cards.data or []
-
-cols = st.columns(4)
-
-for i, item in enumerate(cards_data):
-
-    card = item.get("cards")
-    if not card:
-        continue
-
-    img_path = card["image"]
-
-    img_url = supabase.storage.from_("cards").create_signed_url(
-            card["image"],
-            60
-        )["signedURL"]
-
-    with cols[i % 4]:
-
-        st.markdown(
-            f"""
-            <div style="
-                border-radius:16px;
-                padding:10px;
-                background:#111;
-                text-align:center;
-                box-shadow:0 4px 10px rgba(0,0,0,0.3);
-                margin-bottom:15px;
-            ">
-                <img src="{img_url}" style="
-                    width:100%;
-                    border-radius:12px;
-                "/>
-
-                <h4 style="color:white; margin-top:10px;">
-                    {card["name"]}
-                </h4>
-
-                <p style="color:gray;">
-                    {card.get("rarity","")}
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    cards_data = cards.data or []
+    
+    cols = st.columns(4)
+    
+    for i, item in enumerate(cards_data):
+    
+        card = item.get("cards")
+        if not card:
+            continue
+    
+        img_path = card["image"]
+    
+        img_url = supabase.storage.from_("cards").create_signed_url(
+                card["image"],
+                60
+            )["signedURL"]
+    
+        with cols[i % 4]:
+    
+            st.markdown(
+                f"""
+                <div style="
+                    border-radius:16px;
+                    padding:10px;
+                    background:#111;
+                    text-align:center;
+                    box-shadow:0 4px 10px rgba(0,0,0,0.3);
+                    margin-bottom:15px;
+                ">
+                    <img src="{img_url}" style="
+                        width:100%;
+                        border-radius:12px;
+                    "/>
+    
+                    <h4 style="color:white; margin-top:10px;">
+                        {card["name"]}
+                    </h4>
+    
+                    <p style="color:gray;">
+                        {card.get("rarity","")}
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
