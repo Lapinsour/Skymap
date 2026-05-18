@@ -202,43 +202,45 @@ elif page == "Bibliothèque":
 
     st.title("📚 Bibliothèque")
 
-    if "user" not in st.session_state:
+cards_data = cards.data or []
 
-        st.info(
-            "Connectez-vous."
+cols = st.columns(4)
+
+for i, item in enumerate(cards_data):
+
+    card = item.get("cards")
+    if not card:
+        continue
+
+    img_path = card["image"]
+
+    img_url = supabase.storage.from_("cards").get_public_url(img_path)
+
+    with cols[i % 4]:
+
+        st.markdown(
+            f"""
+            <div style="
+                border-radius:16px;
+                padding:10px;
+                background:#111;
+                text-align:center;
+                box-shadow:0 4px 10px rgba(0,0,0,0.3);
+                margin-bottom:15px;
+            ">
+                <img src="{img_url}" style="
+                    width:100%;
+                    border-radius:12px;
+                "/>
+
+                <h4 style="color:white; margin-top:10px;">
+                    {card["name"]}
+                </h4>
+
+                <p style="color:gray;">
+                    {card.get("rarity","")}
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
-
-        st.stop()
-
-    cards = supabase.table(
-
-        "user_cards"
-
-    ).select(
-
-        "cards(*)"
-
-    ).eq(
-
-        "user_id",
-        st.session_state["user"].id
-
-    ).execute()
-
-    cols = st.columns(3)
-
-    for i, item in enumerate(cards.data):
-
-        card = item.get("cards")
-        if not card:
-            continue
-
-        with cols[i % 3]:
-
-            st.image(
-                card["image"]
-            )
-
-            st.caption(
-                card["name"]
-            )
