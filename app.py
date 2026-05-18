@@ -202,6 +202,11 @@ elif page == "Bibliothèque":
 
     st.title("📚 Bibliothèque")
 
+    cards = supabase.table("user_cards") \
+        .select("cards(*)") \
+        .eq("user_id", st.session_state["user"].id) \
+        .execute()
+
     cards_data = cards.data or []
     
     cols = st.columns(4)
@@ -211,7 +216,11 @@ elif page == "Bibliothèque":
         card = item.get("cards")
         if not card:
             continue
-    
+
+        with cols[i % 4]:
+            st.image(card["image"])
+            st.caption(card["name"])
+            
         img_path = card["image"]
     
         img_url = supabase.storage.from_("cards").create_signed_url(
