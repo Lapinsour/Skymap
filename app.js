@@ -1,36 +1,55 @@
-const supabaseUrl = "https://vkobxpkysltnycafezen.supabase.co"
-const supabaseKey = "sb_publishable_pEPZK8PC-fvTQga03ULs4Q_tJOw3_70"
+const supabaseUrl =
+  "https://vkobxpkysltnycafezen.supabase.co"
 
-const supabase = window.supabase.createClient(
-  supabaseUrl,
-  supabaseKey
-)
+const supabaseKey =
+  "TA_CLE_ANON"
+
+const supabase =
+  window.supabase.createClient(
+    supabaseUrl,
+    supabaseKey
+  )
 
 async function loadCards(){
 
-  const res = await fetch(
-    "cards_metadata.json"
-  )
+  try {
 
-  const cards = await res.json()
+    const res = await fetch(
+      "cards_metadata.json"
+    )
 
-  const grid = document.getElementById(
-    "grid"
-  )
+    if(!res.ok){
+      throw new Error(
+        "Impossible de charger cards_metadata.json"
+      )
+    }
 
-  cards.forEach(card => {
+    const cards = await res.json()
 
-    const div = document.createElement("div")
+    const grid =
+      document.getElementById("grid")
 
-    div.className = "card"
+    cards.forEach(card => {
 
-    div.innerHTML = `
-      <img src="${card.image}">
-      <h2>${card.name || "Carte Commune"}</h2>
-    `
+      const div =
+        document.createElement("div")
 
-    grid.appendChild(div)
-  })
+      div.className = "card"
+
+      div.innerHTML = `
+        <img src="${card.image}">
+        <h2>
+          ${card.name || "Carte Commune"}
+        </h2>
+      `
+
+      grid.appendChild(div)
+    })
+
+  } catch(err){
+
+    console.error(err)
+  }
 }
 
 loadCards()
