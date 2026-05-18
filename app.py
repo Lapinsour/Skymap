@@ -207,7 +207,7 @@ elif page == "Bibliothèque":
         st.stop()
         
     st.write(supabase.table("cards").select("*").limit(1).execute().data)
-    st.write(card["image"])
+    
     user_cards = supabase.table("user_cards") \
         .select("*") \
         .eq("user_id", st.session_state["user"].id) \
@@ -227,7 +227,7 @@ elif page == "Bibliothèque":
     cols = st.columns(4)
 
     for i, card in enumerate(cards.data or []):
-
+        st.write(card["image"])
         if not card:
             continue
 
