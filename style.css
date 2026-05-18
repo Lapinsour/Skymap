@@ -1,0 +1,29 @@
+body{
+  background:#09090f;
+  color:white;
+  font-family:sans-serif;
+  margin:0;
+  padding:1rem;
+}
+
+#grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:1rem;
+}
+
+.card{
+  background:#151525;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.card img{
+  width:100%;
+  display:block;
+}
+
+.card h2{
+  font-size:0.9rem;
+  padding:0.5rem;
+}
