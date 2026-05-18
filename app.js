@@ -52,4 +52,25 @@ async function loadCards(){
   }
 }
 
+async function login(){
+
+  const { data, error } =
+    await supabase.auth.signInAnonymously()
+
+  if(error){
+
+    console.error(error)
+    return
+  }
+
+  console.log(data.user)
+}
+
+document
+  .getElementById("login-btn")
+  .addEventListener(
+    "click",
+    login
+  )
+
 loadCards()
