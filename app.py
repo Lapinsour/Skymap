@@ -230,9 +230,7 @@ elif page == "Bibliothèque":
         
         path = card["image"].lstrip("/")  # sécurité
 
-        img_url = supabase.storage.from_("cards").get_public_url(
-            card["image"]
-        )["publicURL"]
+        img_url = supabase.storage.from_("cards").get_public_url(card["image"])
 
         with cols[i % 4]:
 
