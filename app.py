@@ -227,14 +227,13 @@ elif page == "Bibliothèque":
     cols = st.columns(4)
 
     for i, card in enumerate(cards.data or []):
-        st.write(card["image"])
-        card["image"] = card["image"].replace("cards/", "")
-        st.write(card["image"])
-        if not card:
-            continue
+        st.write("PATH STORAGE:", card["image"])
+        path = card["image"].lstrip("/")  # sécurité
 
-        img_url = supabase.storage.from_("cards") \
-            .create_signed_url(card["image"], 60)["signedURL"]
+        img_url = supabase.storage.from_("cards").create_signed_url(
+            path,
+            60
+        )["signedURL"]
 
         with cols[i % 4]:
 
