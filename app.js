@@ -2,7 +2,7 @@ const supabaseUrl =
   "https://vkobxpkysltnycafezen.supabase.co"
 
 const supabaseKey =
-  "TA_CLE_ANON"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrb2J4cGt5c2x0bnljYWZlemVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMTA0MzksImV4cCI6MjA5NDY4NjQzOX0.SgdwxgdfV-CsdiJeSdvX5OUg_UCMMf2hrz8DpsfJZrE"
 
 const supabase =
   window.supabase.createClient(
