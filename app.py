@@ -219,7 +219,7 @@ elif page == "Bibliothèque":
 
     cards = supabase.table("cards") \
         .select("*") \
-        .in_("id", card_ids) \
+        .in_("card_id", card_ids) \
         .execute()
 
     cols = st.columns(4)
