@@ -198,9 +198,7 @@ if page == "Pioche":
 # PAGE : BIBLIOTHÈQUE
 # =========================
 
-elif page == "Bibliothèque":   
-
-    
+elif page == "Bibliothèque":       
 
     st.title("📚 Bibliothèque")
 
