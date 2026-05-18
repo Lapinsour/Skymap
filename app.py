@@ -201,11 +201,13 @@ if page == "Pioche":
 elif page == "Bibliothèque":       
 
     st.title("📚 Bibliothèque")
-
+    
     if "user" not in st.session_state:
         st.info("Connectez-vous.")
         st.stop()
-
+        
+    st.write(supabase.table("cards").select("*").limit(1).execute().data)
+    
     user_cards = supabase.table("user_cards") \
         .select("*") \
         .eq("user_id", st.session_state["user"].id) \
