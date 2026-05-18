@@ -228,6 +228,8 @@ elif page == "Bibliothèque":
 
     for i, card in enumerate(cards.data or []):
         st.write(card["image"])
+        card["image"] = card["image"].replace("cards/", "")
+        st.write(card["image"])
         if not card:
             continue
 
