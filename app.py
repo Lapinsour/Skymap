@@ -34,20 +34,6 @@ password = st.text_input(
     type="password"
 )
 
-if st.button("Connexion"):
-    res = supabase.auth.sign_in_with_password({
-        "email": email,
-        "password": password
-    })
-    st.session_state["session"] = res.session
-    st.session_state["user"] = res.user
-    
-    supabase.auth.set_session(
-        access_token=res.session.access_token,
-        refresh_token=res.session.refresh_token
-    )
-    st.success("Connecté")
-
 
 # Première connexion
 if st.button("Créer un compte"):
