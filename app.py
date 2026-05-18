@@ -18,7 +18,17 @@ supabase = create_client(
     SUPABASE_URL,
     SUPABASE_KEY
 )
+user_cards = supabase.table("user_cards") \
+    .select("*") \
+    .eq("user_id", st.session_state["user"].id) \
+    .execute()
 
+cards_ids = [uc["card_id"] for uc in user_cards.data]
+
+cards = supabase.table("cards") \
+    .select("*") \
+    .in_("id", cards_ids) \
+    .execute()
 # =========================
 # RESTORE SESSION
 # =========================
