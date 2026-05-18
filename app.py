@@ -206,7 +206,7 @@ elif page == "Bibliothèque":
         st.info("Connectez-vous.")
         st.stop()
         
-    st.write(supabase.table("cards").select("*").limit(1).execute().data)
+    
     
     user_cards = supabase.table("user_cards") \
         .select("*") \
@@ -227,13 +227,12 @@ elif page == "Bibliothèque":
     cols = st.columns(4)
 
     for i, card in enumerate(cards.data or []):
-        st.write("PATH STORAGE:", card["image"])
+        
         path = card["image"].lstrip("/")  # sécurité
 
-        img_url = supabase.storage.from_("cards").create_signed_url(
-            path,
-            60
-        )["signedURL"]
+        img_url = supabase.storage.from_("cards").get_public_url(
+            card["image"]
+        )["publicURL"]
 
         with cols[i % 4]:
 
