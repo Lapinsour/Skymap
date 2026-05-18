@@ -1,11 +1,11 @@
 const supabaseUrl =
-  "https://vkobxpkysltnycafezen.supabaseClient.co"
+  "https://vkobxpkysltnycafezen.supabase.co"
 
 const supabaseKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrb2J4cGt5c2x0bnljYWZlemVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMTA0MzksImV4cCI6MjA5NDY4NjQzOX0.SgdwxgdfV-CsdiJeSdvX5OUg_UCMMf2hrz8DpsfJZrE"
 
 const supabaseClient =
-  window.supabaseClient.createClient(
+  window.supabase.createClient(
     supabaseUrl,
     supabaseKey
   )
