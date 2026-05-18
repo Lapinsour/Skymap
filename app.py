@@ -20,7 +20,7 @@ password = st.text_input(
     "Mot de passe",
     type="password"
 )
-@st.cache_data
+
 if st.button("Connexion"):
     res = supabase.auth.sign_in_with_password({
         "email": email,
