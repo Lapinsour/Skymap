@@ -230,7 +230,7 @@ elif page == "Bibliothèque":
         
         path = card["image"].lstrip("/")  # sécurité
 
-        img_url = supabase.storage.from_("Skyline").get_public_url(card["image"]).replace("/cards/","")
+        img_url = supabase.storage.from_("Skyline").get_public_url(card["image"]).replace("/cards","")
         st.write(img_url)
         st.write(card["image"])
         with cols[i % 4]:
