@@ -84,18 +84,68 @@ async function login(){
 
 async function pullCard(){
 
+  const result =
+    document.getElementById(
+      "pull-result"
+    )
+
+  result.innerHTML = "Chargement..."
+
   const { data, error } =
     await supabase.rpc("pull_card")
 
   if(error){
 
     console.error(error)
+
+    result.innerHTML =
+      "Erreur."
+
     return
   }
 
-  console.log(data)
-}
+  if(!data.success){
 
+    result.innerHTML =
+      "Limite quotidienne atteinte."
+
+    return
+  }
+
+  const card = data.card
+
+  result.innerHTML = `
+
+    <div class="pulled-card">
+
+      <img
+        src="${card.image}"
+        alt="${card.name}"
+      >
+
+      <h2>${card.name}</h2>
+
+      <p>
+        Rareté :
+        ${card.rarity}
+      </p>
+
+      <p>
+        Pulls restants :
+        ${data.remaining_pulls}
+      </p>
+
+      ${
+        data.already_owned
+
+        ? "<p>Doublon</p>"
+
+        : "<p>Nouvelle carte !</p>"
+      }
+
+    </div>
+  `
+}
 // =========================
 // EVENTS
 // =========================
