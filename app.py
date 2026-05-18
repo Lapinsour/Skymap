@@ -229,7 +229,9 @@ elif page == "Bibliothèque":
 
     for i, item in enumerate(cards.data):
 
-        card = item["cards"]
+        card = item.get("cards")
+        if not card:
+            continue
 
         with cols[i % 3]:
 
@@ -240,7 +242,3 @@ elif page == "Bibliothèque":
             st.caption(
                 card["name"]
             )
-for item in cards.data:
-    card = item["cards"]
-    st.image(card["image"])
-    st.write(card["name"])
