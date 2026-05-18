@@ -9,6 +9,19 @@ supabase = create_client(
     SUPABASE_KEY
 )
 
+if (
+    "access_token" in st.session_state
+    and
+    "refresh_token" in st.session_state
+):
+
+    supabase.auth.set_session(
+
+        st.session_state["access_token"],
+        st.session_state["refresh_token"]
+
+    )
+
 if "user" in st.session_state:
     st.success(
         f"Connecté : {st.session_state['user'].email}"
@@ -56,6 +69,28 @@ if st.button("Déconnexion"):
 
     st.rerun()
 
+# Authentification Supabase
+if st.button("Connexion"):
+
+    res = supabase.auth.sign_in_with_password({
+
+        "email": email,
+        "password": password
+
+    })
+
+    st.session_state["access_token"] = \
+        res.session.access_token
+
+    st.session_state["refresh_token"] = \
+        res.session.refresh_token
+
+    st.session_state["user"] = \
+        res.user
+
+    st.success("Connecté")
+
+    st.rerun()
 
 # Pioche
 if st.button("Piocher une carte"):
