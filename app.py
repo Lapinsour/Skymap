@@ -59,6 +59,9 @@ if st.button("Déconnexion"):
 
 # Pioche
 if st.button("Piocher une carte"):
+    st.write(
+            supabase.auth.get_user()
+        )
     result = supabase.rpc(
         "pull_card"
     ).execute()
