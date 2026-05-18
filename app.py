@@ -27,7 +27,7 @@ cards_ids = [uc["card_id"] for uc in user_cards.data]
 
 cards = supabase.table("cards") \
     .select("*") \
-    .in_("id", cards_ids) \
+    .in_("id", card_ids) \
     .execute()
 # =========================
 # RESTORE SESSION
