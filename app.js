@@ -10,6 +10,10 @@ const supabase =
     supabaseKey
   )
 
+// =========================
+// LOAD CARDS
+// =========================
+
 async function loadCards(){
 
   try {
@@ -19,6 +23,7 @@ async function loadCards(){
     )
 
     if(!res.ok){
+
       throw new Error(
         "Impossible de charger cards_metadata.json"
       )
@@ -52,6 +57,10 @@ async function loadCards(){
   }
 }
 
+// =========================
+// LOGIN
+// =========================
+
 async function login(){
 
   const { data, error } =
@@ -63,8 +72,33 @@ async function login(){
     return
   }
 
-  console.log(data.user)
+  console.log(
+    "Connecté :",
+    data.user
+  )
 }
+
+// =========================
+// PULL CARD
+// =========================
+
+async function pullCard(){
+
+  const { data, error } =
+    await supabase.rpc("pull_card")
+
+  if(error){
+
+    console.error(error)
+    return
+  }
+
+  console.log(data)
+}
+
+// =========================
+// EVENTS
+// =========================
 
 document
   .getElementById("login-btn")
@@ -72,5 +106,16 @@ document
     "click",
     login
   )
+
+document
+  .getElementById("pull-btn")
+  .addEventListener(
+    "click",
+    pullCard
+  )
+
+// =========================
+// INIT
+// =========================
 
 loadCards()
