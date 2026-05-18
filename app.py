@@ -214,7 +214,10 @@ for i, item in enumerate(cards_data):
 
     img_path = card["image"]
 
-    img_url = supabase.storage.from_("cards").get_public_url(img_path)
+    img_url = supabase.storage.from_("cards").create_signed_url(
+            card["image"],
+            60
+        )["signedURL"]
 
     with cols[i % 4]:
 
