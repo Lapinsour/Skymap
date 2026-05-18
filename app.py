@@ -18,17 +18,7 @@ supabase = create_client(
     SUPABASE_URL,
     SUPABASE_KEY
 )
-user_cards = supabase.table("user_cards") \
-    .select("*") \
-    .eq("user_id", st.session_state["user"].id) \
-    .execute()
 
-card_ids = [uc["card_id"] for uc in user_cards.data]
-
-cards = supabase.table("cards") \
-    .select("*") \
-    .in_("id", card_ids) \
-    .execute()
 # =========================
 # RESTORE SESSION
 # =========================
@@ -178,7 +168,7 @@ if page == "Pioche":
         else:
 
             card = data["card"]
-            st.write(cards.data)
+            
             st.image(
                 card["image"],
                 use_container_width=True
@@ -208,54 +198,53 @@ if page == "Pioche":
 # PAGE : BIBLIOTHÈQUE
 # =========================
 
-elif page == "Bibliothèque":    
+elif page == "Bibliothèque":   
+
+    
 
     st.title("📚 Bibliothèque")
 
-    cards = supabase.table("user_cards") \
-        .select("cards(*)") \
+    if "user" not in st.session_state:
+        st.info("Connectez-vous.")
+        st.stop()
+
+    user_cards = supabase.table("user_cards") \
+        .select("*") \
         .eq("user_id", st.session_state["user"].id) \
         .execute()
 
-    cards_data = cards.data or []
+    card_ids = [uc["card_id"] for uc in (user_cards.data or [])]
+
+    if not card_ids:
+        st.info("Aucune carte.")
+        st.stop()
+
+    cards = supabase.table("cards") \
+        .select("*") \
+        .in_("id", card_ids) \
+        .execute()
 
     cols = st.columns(4)
 
-    for i, item in enumerate(cards_data):
+    for i, card in enumerate(cards.data or []):
 
-        card = item.get("cards")
         if not card:
             continue
 
-        # 🔐 image Supabase Storage
         img_url = supabase.storage.from_("cards") \
-            .create_signed_url(card["image"], 60)["signedUrl"]
+            .create_signed_url(card["image"], 60)["signedURL"]
 
         with cols[i % 4]:
 
-            st.markdown(
-                f"""
-                <div style="
-                    border-radius:16px;
-                    padding:10px;
-                    background:#111;
-                    text-align:center;
-                    box-shadow:0 4px 10px rgba(0,0,0,0.3);
-                    margin-bottom:15px;
-                ">
-                    <img src="{img_url}" style="
-                        width:100%;
-                        border-radius:12px;
-                    "/>
-
-                    <h4 style="color:white; margin-top:10px;">
-                        {card["name"]}
-                    </h4>
-
-                    <p style="color:gray;">
-                        {card.get("rarity","")}
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            st.markdown(f"""
+            <div style="
+                border-radius:16px;
+                padding:10px;
+                background:#111;
+                text-align:center;
+            ">
+                <img src="{img_url}" style="width:100%; border-radius:12px;"/>
+                <h4 style="color:white">{card["name"]}</h4>
+                <p style="color:gray">{card.get("rarity","")}</p>
+            </div>
+            """, unsafe_allow_html=True)
