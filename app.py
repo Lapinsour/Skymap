@@ -158,7 +158,7 @@ if page == "Pioche":
         ).execute()
 
         data = result.data
-
+        
         if not data["success"]:
 
             st.error(
@@ -168,7 +168,7 @@ if page == "Pioche":
         else:
 
             card = data["card"]
-
+            st.write(cards.data)
             st.image(
                 card["image"],
                 use_container_width=True
