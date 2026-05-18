@@ -1,11 +1,11 @@
 const supabaseUrl =
-  "https://vkobxpkysltnycafezen.supabase.co"
+  "https://vkobxpkysltnycafezen.supabaseClient.co"
 
 const supabaseKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrb2J4cGt5c2x0bnljYWZlemVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMTA0MzksImV4cCI6MjA5NDY4NjQzOX0.SgdwxgdfV-CsdiJeSdvX5OUg_UCMMf2hrz8DpsfJZrE"
 
-const supabase =
-  window.supabase.createClient(
+const supabaseClient =
+  window.supabaseClient.createClient(
     supabaseUrl,
     supabaseKey
   )
@@ -64,7 +64,7 @@ async function loadCards(){
 async function login(){
 
   const { data, error } =
-    await supabase.auth.signInAnonymously()
+    await supabaseClient.auth.signInAnonymously()
 
   if(error){
 
@@ -92,7 +92,7 @@ async function pullCard(){
   result.innerHTML = "Chargement..."
 
   const { data, error } =
-    await supabase.rpc("pull_card")
+    await supabaseClient.rpc("pull_card")
 
   if(error){
 
