@@ -23,7 +23,7 @@ user_cards = supabase.table("user_cards") \
     .eq("user_id", st.session_state["user"].id) \
     .execute()
 
-cards_ids = [uc["card_id"] for uc in user_cards.data]
+card_ids = [uc["card_id"] for uc in user_cards.data]
 
 cards = supabase.table("cards") \
     .select("*") \
