@@ -305,7 +305,7 @@ if page == "Pioche":
         with col:
             st.components.v1.html(
                 card_with_modal_html(img_url, name, rarity, description, "pioche-modal"),
-                height=520,
+                height=600,
                 scrolling=False
             )
 
@@ -388,6 +388,6 @@ elif page == "Bibliothèque":
         with cols[i % 4]:
             st.components.v1.html(
                 card_with_modal_html(img_url, name, rarity, description, modal_id),
-                height=300,
+                height=450,
                 scrolling=False
             )
