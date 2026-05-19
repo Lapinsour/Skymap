@@ -4,211 +4,21 @@ from supabase import create_client
 SUPABASE_URL = "https://vkobxpkysltnycafezen.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrb2J4cGt5c2x0bnljYWZlemVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMTA0MzksImV4cCI6MjA5NDY4NjQzOX0.SgdwxgdfV-CsdiJeSdvX5OUg_UCMMf2hrz8DpsfJZrE"
 
-# =========================
-# CONFIG
-# =========================
-
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # =========================
 # RESTORE SESSION
 # =========================
 
-if (
-    "access_token" in st.session_state
-    and "refresh_token" in st.session_state
-):
+if "access_token" in st.session_state and "refresh_token" in st.session_state:
     supabase.auth.set_session(
         st.session_state["access_token"],
         st.session_state["refresh_token"]
     )
 
 # =========================
-# HTML HELPERS
+# HELPERS
 # =========================
-
-CARD_CSS = """
-<style>
-.card-wrapper {
-    border-radius: 16px;
-    padding: 10px;
-    background: #111;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    height: 100%;
-}
-.card-wrapper:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(255,255,255,0.12);
-}
-.card-img-container {
-    width: 100%;
-    aspect-ratio: 2 / 3;
-    overflow: hidden;
-    border-radius: 12px;
-    background: #222;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.card-img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-.card-name {
-    color: white;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin: 8px 0 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.card-rarity {
-    color: gray;
-    font-size: 0.75rem;
-    margin: 0;
-}
-
-/* Modal */
-.sky-modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 99999;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    backdrop-filter: blur(6px);
-}
-.sky-modal-overlay.open {
-    display: flex;
-}
-.sky-modal-inner {
-    background: #1a1a1a;
-    border-radius: 20px;
-    max-width: 420px;
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.8);
-    animation: modalIn 0.25s ease;
-}
-@keyframes modalIn {
-    from { opacity: 0; transform: scale(0.92); }
-    to   { opacity: 1; transform: scale(1); }
-}
-.sky-modal-img-wrap {
-    width: 100%;
-    aspect-ratio: 2 / 3;
-    overflow: hidden;
-    background: #222;
-}
-.sky-modal-img-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-.sky-modal-body {
-    padding: 20px 24px 28px;
-}
-.sky-modal-name {
-    color: white;
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin: 0 0 4px;
-}
-.sky-modal-rarity {
-    color: #888;
-    font-size: 0.85rem;
-    margin: 0 0 14px;
-}
-.sky-modal-desc {
-    color: #ccc;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin: 0;
-}
-.sky-modal-close {
-    position: absolute;
-    top: 14px;
-    right: 16px;
-    background: rgba(0,0,0,0.55);
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.sky-modal-close:hover {
-    background: rgba(255,255,255,0.15);
-}
-</style>
-"""
-
-
-def card_with_modal_html(img_url, name, rarity, description, modal_id):
-    """
-    Returns a self-contained card + modal block.
-    The modal lives inside the same st.markdown() iframe as the card,
-    so JS can always find it without cross-frame issues.
-    """
-    safe_name = name.replace("<", "&lt;").replace(">", "&gt;")
-    safe_rarity = rarity.replace("<", "&lt;").replace(">", "&gt;")
-    safe_desc = description.replace("<", "&lt;").replace(">", "&gt;")
-
-    return f"""
-{CARD_CSS}
-
-<!-- Card -->
-<div class="card-wrapper" onclick="document.getElementById('{modal_id}').classList.add('open')">
-    <div class="card-img-container">
-        <img src="{img_url}" alt="{safe_name}" loading="lazy"/>
-    </div>
-    <p class="card-name">{safe_name}</p>
-    <p class="card-rarity">{safe_rarity}</p>
-</div>
-
-<!-- Modal (inside the same iframe as the card) -->
-<div class="sky-modal-overlay" id="{modal_id}"
-     onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="sky-modal-inner">
-        <button class="sky-modal-close"
-                onclick="document.getElementById('{modal_id}').classList.remove('open')">✕</button>
-        <div class="sky-modal-img-wrap">
-            <img src="{img_url}" alt="{safe_name}"/>
-        </div>
-        <div class="sky-modal-body">
-            <p class="sky-modal-name">{safe_name}</p>
-            <p class="sky-modal-rarity">Rareté : {safe_rarity}</p>
-            <p class="sky-modal-desc">{safe_desc}</p>
-        </div>
-    </div>
-</div>
-
-<script>
-(function() {{
-    document.addEventListener('keydown', function(e) {{
-        if (e.key === 'Escape') {{
-            var m = document.getElementById('{modal_id}');
-            if (m) m.classList.remove('open');
-        }}
-    }});
-}})();
-</script>
-"""
-
 
 def get_img_url(card):
     return (
@@ -218,23 +28,409 @@ def get_img_url(card):
         .replace("/cards", "")
     )
 
+def build_library_html(cards):
+    """
+    Single self-contained HTML block:
+    - 4-column card grid (uniform 2/3 ratio)
+    - One fullscreen overlay shared by all cards
+    - Click card → overlay opens (shows image + title)
+    - Click again → flips to description
+    - Click again → flips back to image
+    - Click outside card → overlay closes
+    """
+
+    cards_json_items = []
+    for card in cards:
+        img_url = get_img_url(card)
+        name = card["name"].replace('"', '&quot;').replace("'", r"\'")
+        rarity = card.get("rarity", "").replace('"', '&quot;').replace("'", r"\'")
+        desc = card.get("description", "").replace('"', '&quot;').replace("'", r"\'").replace("\n", r"\n")
+        cid = card["card_id"]
+        cards_json_items.append(
+            f'{{"id":"{cid}","img":"{img_url}","name":"{name}","rarity":"{rarity}","desc":"{desc}"}}'
+        )
+
+    cards_json = "[" + ",".join(cards_json_items) + "]"
+
+    # Build thumbnail grid HTML
+    thumbs_html = ""
+    for card in cards:
+        img_url = get_img_url(card)
+        safe_name = card["name"].replace('"', '&quot;')
+        cid = card["card_id"]
+        thumbs_html += f"""
+        <div class="card-thumb" onclick="openCard('{cid}')" title="{safe_name}">
+            <div class="card-img-wrap">
+                <img src="{img_url}" alt="{safe_name}" loading="lazy"/>
+            </div>
+            <p class="card-name">{safe_name}</p>
+            <p class="card-rarity">{card.get("rarity","")}</p>
+        </div>
+        """
+
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ background: transparent; font-family: sans-serif; }}
+
+  /* Grid */
+  .grid {{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    padding: 4px;
+  }}
+
+  /* Thumbnail card */
+  .card-thumb {{
+    background: #111;
+    border-radius: 14px;
+    padding: 8px;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }}
+  .card-thumb:hover {{
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(255,255,255,0.1);
+  }}
+  .card-img-wrap {{
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #222;
+  }}
+  .card-img-wrap img {{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }}
+  .card-name {{
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }}
+  .card-rarity {{
+    color: #666;
+    font-size: 0.68rem;
+    margin-top: 2px;
+  }}
+
+  /* Overlay */
+  #overlay {{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }}
+  #overlay.active {{
+    display: flex;
+  }}
+
+  /* Modal card */
+  #modal-card {{
+    width: min(340px, 80vw);
+    background: #1a1a1a;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.9);
+    animation: popIn 0.22s ease;
+    user-select: none;
+  }}
+  @keyframes popIn {{
+    from {{ opacity: 0; transform: scale(0.88); }}
+    to   {{ opacity: 1; transform: scale(1); }}
+  }}
+
+  /* Face: image */
+  #face-image {{
+    display: block;
+  }}
+  #face-image .modal-img-wrap {{
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background: #222;
+  }}
+  #face-image .modal-img-wrap img {{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }}
+  #face-image .modal-info {{
+    padding: 16px 20px 20px;
+  }}
+  #face-image .modal-name {{
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }}
+  #face-image .modal-rarity {{
+    color: #888;
+    font-size: 0.8rem;
+    margin-top: 4px;
+  }}
+  #face-image .modal-hint {{
+    color: #555;
+    font-size: 0.72rem;
+    margin-top: 10px;
+    font-style: italic;
+  }}
+
+  /* Face: description */
+  #face-desc {{
+    display: none;
+    padding: 36px 28px 40px;
+    min-height: 280px;
+    flex-direction: column;
+    justify-content: center;
+  }}
+  #face-desc.active {{
+    display: flex;
+  }}
+  #face-image.hidden {{
+    display: none;
+  }}
+  #face-desc .desc-name {{
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }}
+  #face-desc .desc-text {{
+    color: #ccc;
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }}
+  #face-desc .modal-hint {{
+    color: #555;
+    font-size: 0.72rem;
+    margin-top: 20px;
+    font-style: italic;
+  }}
+
+  /* Close button */
+  #modal-close {{
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }}
+  #modal-close:hover {{ background: rgba(255,255,255,0.15); }}
+</style>
+</head>
+<body>
+
+<!-- Thumbnail grid -->
+<div class="grid">
+  {thumbs_html}
+</div>
+
+<!-- Shared overlay -->
+<div id="overlay" onclick="handleOverlayClick(event)">
+  <div id="modal-card" onclick="handleCardClick(event)">
+    <button id="modal-close" onclick="closeOverlay(event)">✕</button>
+
+    <!-- Face 1: image + title -->
+    <div id="face-image">
+      <div class="modal-img-wrap">
+        <img id="modal-img" src="" alt=""/>
+      </div>
+      <div class="modal-info">
+        <p class="modal-name" id="modal-name"></p>
+        <p class="modal-rarity" id="modal-rarity"></p>
+        <p class="modal-hint">Cliquer pour voir la description →</p>
+      </div>
+    </div>
+
+    <!-- Face 2: description -->
+    <div id="face-desc">
+      <p class="desc-name" id="modal-desc-name"></p>
+      <p class="desc-text" id="modal-desc-text"></p>
+      <p class="modal-hint">← Cliquer pour revenir à la carte</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  var CARDS = {cards_json};
+  var cardMap = {{}};
+  CARDS.forEach(function(c) {{ cardMap[c.id] = c; }});
+
+  var showingDesc = false;
+
+  function openCard(id) {{
+    var c = cardMap[id];
+    if (!c) return;
+    showingDesc = false;
+
+    document.getElementById('modal-img').src = c.img;
+    document.getElementById('modal-name').textContent = c.name;
+    document.getElementById('modal-rarity').textContent = 'Rareté : ' + c.rarity;
+    document.getElementById('modal-desc-name').textContent = c.name;
+    document.getElementById('modal-desc-text').textContent = c.desc;
+
+    // Show image face
+    document.getElementById('face-image').classList.remove('hidden');
+    document.getElementById('face-desc').classList.remove('active');
+
+    document.getElementById('overlay').classList.add('active');
+  }}
+
+  function handleCardClick(e) {{
+    e.stopPropagation();
+    // Don't toggle if close button was clicked
+    if (e.target.id === 'modal-close') return;
+
+    showingDesc = !showingDesc;
+    if (showingDesc) {{
+      document.getElementById('face-image').classList.add('hidden');
+      document.getElementById('face-desc').classList.add('active');
+    }} else {{
+      document.getElementById('face-image').classList.remove('hidden');
+      document.getElementById('face-desc').classList.remove('active');
+    }}
+  }}
+
+  function handleOverlayClick(e) {{
+    // Click outside the modal card closes the overlay
+    if (e.target === document.getElementById('overlay')) {{
+      closeOverlay(e);
+    }}
+  }}
+
+  function closeOverlay(e) {{
+    if (e) e.stopPropagation();
+    document.getElementById('overlay').classList.remove('active');
+  }}
+
+  document.addEventListener('keydown', function(e) {{
+    if (e.key === 'Escape') closeOverlay(null);
+  }});
+</script>
+</body>
+</html>
+"""
+
+def build_pioche_html(card):
+    img_url = get_img_url(card)
+    name = card["name"].replace('"', '&quot;')
+    rarity = card.get("rarity", "").replace('"', '&quot;')
+    desc = card.get("description", "").replace('"', '&quot;').replace("\n", "&#10;")
+
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ background: transparent; font-family: sans-serif; display: flex; justify-content: center; }}
+
+  #modal-card {{
+    width: min(300px, 90vw);
+    background: #1a1a1a;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+    user-select: none;
+  }}
+
+  #face-image {{ display: block; }}
+  .modal-img-wrap {{
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background: #222;
+  }}
+  .modal-img-wrap img {{
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }}
+  .modal-info {{ padding: 16px 20px 20px; }}
+  .modal-name {{ color: #fff; font-size: 1.1rem; font-weight: 700; }}
+  .modal-rarity {{ color: #888; font-size: 0.8rem; margin-top: 4px; }}
+  .modal-hint {{ color: #555; font-size: 0.72rem; margin-top: 10px; font-style: italic; }}
+
+  #face-desc {{
+    display: none;
+    padding: 36px 28px 40px;
+    min-height: 280px;
+    flex-direction: column;
+    justify-content: center;
+  }}
+  #face-desc.active {{ display: flex; }}
+  #face-image.hidden {{ display: none; }}
+  .desc-name {{ color: #fff; font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }}
+  .desc-text {{ color: #ccc; font-size: 0.9rem; line-height: 1.65; }}
+</style>
+</head>
+<body>
+  <div id="modal-card" onclick="toggle()">
+    <div id="face-image">
+      <div class="modal-img-wrap">
+        <img src="{img_url}" alt="{name}"/>
+      </div>
+      <div class="modal-info">
+        <p class="modal-name">{name}</p>
+        <p class="modal-rarity">Rareté : {rarity}</p>
+        <p class="modal-hint">Cliquer pour voir la description →</p>
+      </div>
+    </div>
+    <div id="face-desc">
+      <p class="desc-name">{name}</p>
+      <p class="desc-text">{desc}</p>
+      <p class="modal-hint" style="margin-top:20px; color:#555; font-size:0.72rem; font-style:italic;">← Cliquer pour revenir à la carte</p>
+    </div>
+  </div>
+<script>
+  var showingDesc = false;
+  function toggle() {{
+    showingDesc = !showingDesc;
+    document.getElementById('face-image').classList.toggle('hidden', showingDesc);
+    document.getElementById('face-desc').classList.toggle('active', showingDesc);
+  }}
+</script>
+</body>
+</html>
+"""
 
 # =========================
 # SIDEBAR
 # =========================
 
 st.sidebar.title("✦ Skymap")
-
 page = st.sidebar.radio("Navigation", ["Pioche", "Bibliothèque"])
-
-# =========================
-# AUTH SIDEBAR
-# =========================
-
 st.sidebar.divider()
 
 if "user" not in st.session_state:
-
     st.sidebar.subheader("Connexion")
     email = st.sidebar.text_input("Email")
     password = st.sidebar.text_input("Mot de passe", type="password")
@@ -255,7 +451,6 @@ if "user" not in st.session_state:
             st.sidebar.success("Compte créé.")
         except Exception as e:
             st.sidebar.error(str(e))
-
 else:
     st.sidebar.success(f"Connecté :\n\n{st.session_state['user'].email}")
     if st.sidebar.button("Déconnexion"):
@@ -268,7 +463,6 @@ else:
 # =========================
 
 if page == "Pioche":
-
     st.title("🎴 Pioche")
 
     if "user" not in st.session_state:
@@ -278,43 +472,33 @@ if page == "Pioche":
     if st.button("Piocher une carte"):
         result = supabase.rpc("pull_card").execute()
         data = result.data
-
         if not data["success"]:
             st.session_state.pop("last_pulled_card", None)
             st.error("Limite quotidienne atteinte.")
         else:
             st.session_state["last_pulled_card"] = data
 
-    # Display last pulled card
     if "last_pulled_card" in st.session_state:
         data = st.session_state["last_pulled_card"]
         card = data["card"]
-
-        img_url = get_img_url(card)
-        name = card["name"]
-        rarity = card.get("rarity", "")
-        description = card.get("description", "")
 
         if data["already_owned"]:
             st.warning("Doublon")
         else:
             st.success("Nouvelle carte !")
 
-        # Center the card in a single column
-        col = st.columns([1, 2, 1])[1]
-        with col:
-            st.components.v1.html(
-                card_with_modal_html(img_url, name, rarity, description, "pioche-modal"),
-                height=600,
-                scrolling=True
-            )
+        # Estimate height: image (300 * 3/2 = 450) + info block (~110)
+        st.components.v1.html(
+            build_pioche_html(card),
+            height=580,
+            scrolling=False
+        )
 
 # =========================
 # PAGE : BIBLIOTHÈQUE
 # =========================
 
 elif page == "Bibliothèque":
-
     st.title("📚 Bibliothèque")
 
     if "user" not in st.session_state:
@@ -327,7 +511,6 @@ elif page == "Bibliothèque":
         .eq("user_id", st.session_state["user"].id)
         .execute()
     )
-
     card_ids = [uc["card_id"] for uc in (user_cards.data or [])]
 
     if not card_ids:
@@ -342,52 +525,34 @@ elif page == "Bibliothèque":
     )
     all_cards = cards_result.data or []
 
-    common_cards = [c for c in all_cards if c.get("rarity", "").lower() == "common"]
+    common_cards    = [c for c in all_cards if c.get("rarity", "").lower() == "common"]
     non_common_cards = [c for c in all_cards if c.get("rarity", "").lower() != "common"]
 
-    # --- Common card counter ---
+    # Common counter
     if common_cards:
-        st.markdown(
-            f"""
-            <div style="
-                display: inline-flex;
-                align-items: center;
-                gap: 10px;
-                background: #1a1a1a;
-                border: 1px solid #333;
-                border-radius: 12px;
-                padding: 10px 20px;
-                margin-bottom: 24px;
-            ">
-                <span style="font-size: 1.4rem;">🃏</span>
-                <div>
-                    <div style="color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Cartes Common</div>
-                    <div style="color: white; font-size: 1.3rem; font-weight: 700;">{len(common_cards)}</div>
-                </div>
+        st.markdown(f"""
+        <div style="display:inline-flex;align-items:center;gap:10px;
+                    background:#1a1a1a;border:1px solid #333;border-radius:12px;
+                    padding:10px 20px;margin-bottom:24px;">
+            <span style="font-size:1.4rem;">🃏</span>
+            <div>
+                <div style="color:#888;font-size:0.75rem;text-transform:uppercase;
+                            letter-spacing:0.08em;">Cartes Common</div>
+                <div style="color:white;font-size:1.3rem;font-weight:700;">{len(common_cards)}</div>
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+        </div>""", unsafe_allow_html=True)
 
     if not non_common_cards:
         st.info("Aucune carte rare ou supérieure pour le moment.")
         st.stop()
 
-    # --- Card grid (4 columns) ---
-    # Each card needs its own st.components.v1.html() call so the modal
-    # and its trigger live inside the same iframe — no cross-frame JS issues.
-    cols = st.columns(4)
+    # Estimate grid height: each row is roughly (column_width * 3/2) tall
+    # With 4 cols and ~200px thumb width → ~300px/row + label ~50px = ~350px/row
+    n_rows = (len(non_common_cards) + 3) // 4
+    grid_height = n_rows * 360 + 40  # 360px per row + padding
 
-    for i, card in enumerate(non_common_cards):
-        img_url = get_img_url(card)
-        name = card["name"]
-        rarity = card.get("rarity", "")
-        description = card.get("description", "")
-        modal_id = f"modal-{card['card_id']}"
-
-        with cols[i % 4]:
-            st.components.v1.html(
-                card_with_modal_html(img_url, name, rarity, description, modal_id),
-                height=450,
-                scrolling=False
-            )
+    st.components.v1.html(
+        build_library_html(non_common_cards),
+        height=grid_height,
+        scrolling=False
+    )
