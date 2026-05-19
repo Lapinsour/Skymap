@@ -306,7 +306,7 @@ if page == "Pioche":
             st.components.v1.html(
                 card_with_modal_html(img_url, name, rarity, description, "pioche-modal"),
                 height=600,
-                scrolling=False
+                scrolling=True
             )
 
 # =========================
