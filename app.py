@@ -24,12 +24,11 @@ if (
     )
 
 # =========================
-# MODAL STYLES + JS
+# HTML HELPERS
 # =========================
 
-st.markdown("""
+CARD_CSS = """
 <style>
-/* ---- Card grid uniform sizing ---- */
 .card-wrapper {
     border-radius: 16px;
     padding: 10px;
@@ -74,8 +73,8 @@ st.markdown("""
     margin: 0;
 }
 
-/* ---- Modal overlay ---- */
-#card-modal {
+/* Modal */
+.sky-modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
@@ -86,13 +85,13 @@ st.markdown("""
     padding: 20px;
     backdrop-filter: blur(6px);
 }
-#card-modal.open {
+.sky-modal-overlay.open {
     display: flex;
 }
-#card-modal-inner {
+.sky-modal-inner {
     background: #1a1a1a;
     border-radius: 20px;
-    max-width: 480px;
+    max-width: 420px;
     width: 100%;
     overflow: hidden;
     position: relative;
@@ -103,100 +102,122 @@ st.markdown("""
     from { opacity: 0; transform: scale(0.92); }
     to   { opacity: 1; transform: scale(1); }
 }
-#modal-img-container {
+.sky-modal-img-wrap {
     width: 100%;
     aspect-ratio: 2 / 3;
     overflow: hidden;
     background: #222;
 }
-#modal-img-container img {
+.sky-modal-img-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
 }
-#modal-body {
+.sky-modal-body {
     padding: 20px 24px 28px;
 }
-#modal-name {
+.sky-modal-name {
     color: white;
     font-size: 1.3rem;
     font-weight: 700;
     margin: 0 0 4px;
 }
-#modal-rarity {
+.sky-modal-rarity {
     color: #888;
     font-size: 0.85rem;
     margin: 0 0 14px;
 }
-#modal-description {
+.sky-modal-desc {
     color: #ccc;
     font-size: 0.9rem;
     line-height: 1.6;
     margin: 0;
 }
-#modal-close {
+.sky-modal-close {
     position: absolute;
     top: 14px;
     right: 16px;
     background: rgba(0,0,0,0.55);
     border: none;
     color: white;
-    font-size: 1.4rem;
-    line-height: 1;
-    width: 36px;
-    height: 36px;
+    font-size: 1.2rem;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s;
 }
-#modal-close:hover {
+.sky-modal-close:hover {
     background: rgba(255,255,255,0.15);
 }
 </style>
+"""
 
-<!-- Modal HTML -->
-<div id="card-modal">
-  <div id="card-modal-inner">
-    <button id="modal-close" onclick="closeModal()">✕</button>
-    <div id="modal-img-container">
-      <img id="modal-img" src="" alt=""/>
+
+def card_with_modal_html(img_url, name, rarity, description, modal_id):
+    """
+    Returns a self-contained card + modal block.
+    The modal lives inside the same st.markdown() iframe as the card,
+    so JS can always find it without cross-frame issues.
+    """
+    safe_name = name.replace("<", "&lt;").replace(">", "&gt;")
+    safe_rarity = rarity.replace("<", "&lt;").replace(">", "&gt;")
+    safe_desc = description.replace("<", "&lt;").replace(">", "&gt;")
+
+    return f"""
+{CARD_CSS}
+
+<!-- Card -->
+<div class="card-wrapper" onclick="document.getElementById('{modal_id}').classList.add('open')">
+    <div class="card-img-container">
+        <img src="{img_url}" alt="{safe_name}" loading="lazy"/>
     </div>
-    <div id="modal-body">
-      <p id="modal-name"></p>
-      <p id="modal-rarity"></p>
-      <p id="modal-description"></p>
+    <p class="card-name">{safe_name}</p>
+    <p class="card-rarity">{safe_rarity}</p>
+</div>
+
+<!-- Modal (inside the same iframe as the card) -->
+<div class="sky-modal-overlay" id="{modal_id}"
+     onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="sky-modal-inner">
+        <button class="sky-modal-close"
+                onclick="document.getElementById('{modal_id}').classList.remove('open')">✕</button>
+        <div class="sky-modal-img-wrap">
+            <img src="{img_url}" alt="{safe_name}"/>
+        </div>
+        <div class="sky-modal-body">
+            <p class="sky-modal-name">{safe_name}</p>
+            <p class="sky-modal-rarity">Rareté : {safe_rarity}</p>
+            <p class="sky-modal-desc">{safe_desc}</p>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-function openCard(imgUrl, name, rarity, description) {
-    document.getElementById("modal-img").src = imgUrl;
-    document.getElementById("modal-name").textContent = name;
-    document.getElementById("modal-rarity").textContent = "Rareté : " + rarity;
-    document.getElementById("modal-description").textContent = description || "";
-    document.getElementById("card-modal").classList.add("open");
-    document.body.style.overflow = "hidden";
-}
-function closeModal() {
-    document.getElementById("card-modal").classList.remove("open");
-    document.body.style.overflow = "";
-}
-// Close on backdrop click
-document.getElementById("card-modal").addEventListener("click", function(e) {
-    if (e.target === this) closeModal();
-});
-// Close on Escape key
-document.addEventListener("keydown", function(e) {
-    if (e.key === "Escape") closeModal();
-});
+(function() {{
+    document.addEventListener('keydown', function(e) {{
+        if (e.key === 'Escape') {{
+            var m = document.getElementById('{modal_id}');
+            if (m) m.classList.remove('open');
+        }}
+    }});
+}})();
 </script>
-""", unsafe_allow_html=True)
+"""
+
+
+def get_img_url(card):
+    return (
+        supabase.storage
+        .from_("Skyline")
+        .get_public_url(card["image"])
+        .replace("/cards", "")
+    )
+
 
 # =========================
 # SIDEBAR
@@ -204,10 +225,7 @@ document.addEventListener("keydown", function(e) {
 
 st.sidebar.title("✦ Skymap")
 
-page = st.sidebar.radio(
-    "Navigation",
-    ["Pioche", "Bibliothèque"]
-)
+page = st.sidebar.radio("Navigation", ["Pioche", "Bibliothèque"])
 
 # =========================
 # AUTH SIDEBAR
@@ -218,16 +236,12 @@ st.sidebar.divider()
 if "user" not in st.session_state:
 
     st.sidebar.subheader("Connexion")
-
     email = st.sidebar.text_input("Email")
     password = st.sidebar.text_input("Mot de passe", type="password")
 
     if st.sidebar.button("Connexion"):
         try:
-            res = supabase.auth.sign_in_with_password({
-                "email": email,
-                "password": password
-            })
+            res = supabase.auth.sign_in_with_password({"email": email, "password": password})
             st.session_state["access_token"] = res.session.access_token
             st.session_state["refresh_token"] = res.session.refresh_token
             st.session_state["user"] = res.user
@@ -244,7 +258,6 @@ if "user" not in st.session_state:
 
 else:
     st.sidebar.success(f"Connecté :\n\n{st.session_state['user'].email}")
-
     if st.sidebar.button("Déconnexion"):
         supabase.auth.sign_out()
         st.session_state.clear()
@@ -263,23 +276,38 @@ if page == "Pioche":
         st.stop()
 
     if st.button("Piocher une carte"):
-
         result = supabase.rpc("pull_card").execute()
         data = result.data
 
         if not data["success"]:
+            st.session_state.pop("last_pulled_card", None)
             st.error("Limite quotidienne atteinte.")
         else:
-            card = data["card"]
+            st.session_state["last_pulled_card"] = data
 
-            st.image(card["image"], use_container_width=True)
-            st.subheader(card["name"])
-            st.write(f"Rareté : {card['rarity']}")
+    # Display last pulled card
+    if "last_pulled_card" in st.session_state:
+        data = st.session_state["last_pulled_card"]
+        card = data["card"]
 
-            if data["already_owned"]:
-                st.warning("Doublon")
-            else:
-                st.success("Nouvelle carte !")
+        img_url = get_img_url(card)
+        name = card["name"]
+        rarity = card.get("rarity", "")
+        description = card.get("description", "")
+
+        if data["already_owned"]:
+            st.warning("Doublon")
+        else:
+            st.success("Nouvelle carte !")
+
+        # Center the card in a single column
+        col = st.columns([1, 2, 1])[1]
+        with col:
+            st.components.v1.html(
+                card_with_modal_html(img_url, name, rarity, description, "pioche-modal"),
+                height=520,
+                scrolling=False
+            )
 
 # =========================
 # PAGE : BIBLIOTHÈQUE
@@ -306,7 +334,6 @@ elif page == "Bibliothèque":
         st.info("Aucune carte.")
         st.stop()
 
-    # Fetch all owned cards details
     cards_result = (
         supabase.table("cards")
         .select("*")
@@ -315,7 +342,6 @@ elif page == "Bibliothèque":
     )
     all_cards = cards_result.data or []
 
-    # Separate Common cards from the rest
     common_cards = [c for c in all_cards if c.get("rarity", "").lower() == "common"]
     non_common_cards = [c for c in all_cards if c.get("rarity", "").lower() != "common"]
 
@@ -343,42 +369,25 @@ elif page == "Bibliothèque":
             unsafe_allow_html=True
         )
 
-    # --- Non-common cards grid ---
     if not non_common_cards:
         st.info("Aucune carte rare ou supérieure pour le moment.")
         st.stop()
 
+    # --- Card grid (4 columns) ---
+    # Each card needs its own st.components.v1.html() call so the modal
+    # and its trigger live inside the same iframe — no cross-frame JS issues.
     cols = st.columns(4)
 
     for i, card in enumerate(non_common_cards):
-
-        img_url = (
-            supabase.storage
-            .from_("Skyline")
-            .get_public_url(card["image"])
-            .replace("/cards", "")
-        )
-
+        img_url = get_img_url(card)
         name = card["name"]
         rarity = card.get("rarity", "")
         description = card.get("description", "")
-
-        # Escape single quotes for inline JS
-        js_img = img_url.replace("'", "\\'")
-        js_name = name.replace("'", "\\'")
-        js_rarity = rarity.replace("'", "\\'")
-        js_desc = description.replace("'", "\\'").replace("\n", "\\n")
+        modal_id = f"modal-{card['card_id']}"
 
         with cols[i % 4]:
-            st.markdown(
-                f"""
-                <div class="card-wrapper" onclick="openCard('{js_img}', '{js_name}', '{js_rarity}', '{js_desc}')">
-                    <div class="card-img-container">
-                        <img src="{img_url}" alt="{name}" loading="lazy"/>
-                    </div>
-                    <p class="card-name">{name}</p>
-                    <p class="card-rarity">{rarity}</p>
-                </div>
-                """,
-                unsafe_allow_html=True
+            st.components.v1.html(
+                card_with_modal_html(img_url, name, rarity, description, modal_id),
+                height=300,
+                scrolling=False
             )
